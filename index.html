@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#141414">
+<title>Joshua Park — Creative Developer</title>
+<meta name="description" content="Creative developer building motion-led interfaces for the web. Selected work, 2026 edition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a href="#main" class="skip-content">Skip to main content</a>
+
+<!-- ============ SPLIT GRADIENT BACKGROUND ============ -->
+<div class="background" aria-hidden="true">
+  <div class="background__wrapper background__wrapper--peach"><span class="background__inner"></span></div>
+  <div class="background__wrapper background__wrapper--blue"><span class="background__inner"></span></div>
+</div>
+
+<!-- ============ WEBGL RING LOGO ============ -->
+<div class="logo-webgl" aria-hidden="true"><canvas class="logo-webgl__canvas"></canvas></div>
+
+<!-- ============ RIGHT VERTICAL RAIL ============ -->
+<header class="header">
+  <button class="nav-toggle" aria-label="Open navigation" aria-expanded="false">
+    <svg class="nav-toggle__svg nav-toggle__svg--menu" viewBox="0 0 45 25" fill="none" aria-hidden="true">
+      <path d="M0 .5h45"/><path d="M0 12.5h45"/><path d="M0 24.5h45"/>
+    </svg>
+    <svg class="nav-toggle__svg nav-toggle__svg--close" viewBox="0 0 25 26" fill="none" aria-hidden="true">
+      <path d="M24.293 1.354.716 24.931"/><path d="m.354.646 23.577 23.578"/>
+    </svg>
+  </button>
+
+  <a href="#top" class="header__title p"><span>Joshua<br>Park</span></a>
+
+  <nav class="header-nav" aria-label="Primary">
+    <ul class="header-nav__list">
+      <li class="header-nav-item"><a href="#work" class="header-nav-item__link p"><span>Selected<br>Work</span></a></li>
+      <li class="header-nav-item"><a href="#craft" class="header-nav-item__link p"><span>How I<br>Build</span></a></li>
+      <li class="header-nav-item"><a href="#about" class="header-nav-item__link p"><span>About<br>me</span></a></li>
+    </ul>
+  </nav>
+
+  <div class="header__language-selector">
+    <div class="language-selector"><a href="#contact" class="language-selector__link ttu p2">cv</a></div>
+  </div>
+
+  <button class="tickets-toggle p" aria-label="Open contact panel" aria-expanded="false">
+    <span class="tickets-toggle__labels"><span class="tickets-toggle__label">Get<br>in touch</span></span>
+    <span class="tickets-toggle__icons">
+      <svg class="tickets-toggle__svg tickets-toggle__svg--arrow" viewBox="0 0 21 22" fill="none" aria-hidden="true">
+        <path d="M.63 1h19.373v20"/><path d="M0-.5h27.844" transform="matrix(-.69574 .71829 -.69574 -.71829 19.373 1)"/>
+      </svg>
+      <svg class="tickets-toggle__svg tickets-toggle__svg--close" viewBox="0 0 25 26" fill="none" aria-hidden="true">
+        <path d="M24.293 1.354.716 24.931"/><path d="m.354.646 23.577 23.578"/>
+      </svg>
+    </span>
+  </button>
+</header>
+
+<!-- ============ FULLSCREEN NAV OVERLAY ============ -->
+<nav class="nav" aria-label="Overlay navigation" hidden>
+  <div class="nav__wrapper nav__wrapper--main">
+    <ul class="nav__list">
+      <li><a href="#work" class="nav-item h3 nav-item--arrow-hover"><span class="nav-item__label">Selected<br>Work</span>
+        <span class="nav-item__svg-wrapper"><svg class="nav-item__svg" viewBox="0 0 21 22" fill="none" aria-hidden="true"><path d="M.63 1h19.373v20"/><path d="M0-.5h27.844" transform="matrix(-.69574 .71829 -.69574 -.71829 19.373 1)"/></svg></span></a></li>
+      <li><a href="#craft" class="nav-item h3 nav-item--arrow-hover"><span class="nav-item__label">How I<br>Build</span>
+        <span class="nav-item__svg-wrapper"><svg class="nav-item__svg" viewBox="0 0 21 22" fill="none" aria-hidden="true"><path d="M.63 1h19.373v20"/><path d="M0-.5h27.844" transform="matrix(-.69574 .71829 -.69574 -.71829 19.373 1)"/></svg></span></a></li>
+      <li><a href="#about" class="nav-item h3 nav-item--arrow-hover"><span class="nav-item__label">About<br>me</span>
+        <span class="nav-item__svg-wrapper"><svg class="nav-item__svg" viewBox="0 0 21 22" fill="none" aria-hidden="true"><path d="M.63 1h19.373v20"/><path d="M0-.5h27.844" transform="matrix(-.69574 .71829 -.69574 -.71829 19.373 1)"/></svg></span></a></li>
+    </ul>
+  </div>
+  <div class="nav__wrapper nav__wrapper--alt">
+    <div class="nav__wrapper-row">
+      <ul class="nav__list">
+        <li><a href="#work" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Case studies</span></a></li>
+        <li><a href="#craft" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Toolkit</span></a></li>
+        <li><a href="#contact" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Contact</span></a></li>
+      </ul>
+      <ul class="nav__list">
+        <li><a href="#about" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Writing</span></a></li>
+        <li><a href="#about" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Experiments</span></a></li>
+        <li><a href="#contact" class="nav-item p nav-item--fade-hover"><span class="nav-item__label">Résumé</span></a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="nav__wrapper nav__wrapper--tickets">
+    <button class="nav-tickets-btn h3">Say hello
+      <span class="nav-tickets-btn__svg-wrapper"><svg viewBox="0 0 21 22" fill="none" aria-hidden="true"><path d="M.63 1h19.373v20"/><path d="M0-.5h27.844" transform="matrix(-.69574 .71829 -.69574 -.71829 19.373 1)"/></svg></span>
+    </button>
+  </div>
+</nav>
+
+<div class="content-wrapper">
+<main class="home" id="main">
+
+  <!-- ============ HERO ============ -->
+  <section class="home-hero" id="top">
+    <div class="home-hero__type">
+      <h1 class="home-hero__title">
+        <span class="line"><span class="line__inner">Joshua</span></span>
+        <span class="line"><span class="line__inner">Park<sup>®</sup></span></span>
+      </h1>
+      <p class="home-hero__sub p2 ttu">Creative developer — motion, WebGL &amp; interface</p>
+    </div>
+    <div class="home-hero-cta">
+      <a href="#work" class="pill-btn" data-cursor="next"><span>Selected work</span></a>
+    </div>
+    <div class="parallax-asset parallax-asset--abs home-hero__blob" data-speed="0.18"></div>
+  </section>
+
+  <!-- ============ BIG DATE / STATEMENT ============ -->
+  <section class="home-statement">
+    <h2 class="statement-title">
+      <span class="line"><span class="line__inner">Interfaces</span></span>
+      <span class="line line--right"><span class="line__inner">that move</span></span>
+    </h2>
+    <div class="statement-panel">
+      <p class="p">I design and build the front of the internet — scroll choreography,
+      WebGL, and interaction systems for teams who care how a thing feels, not just how it looks.</p>
+      <p class="p statement-panel__meta">Available for select projects — 2026</p>
+    </div>
+    <div class="halftone" aria-hidden="true"><canvas class="halftone__canvas"></canvas></div>
+  </section>
+
+  <!-- ============ WORDS CAROUSEL (over WebGL ring) ============ -->
+  <section class="words-carousel" id="craft">
+    <div class="words-carousel__stage">
+      <div class="masked-title" data-words>
+        <span class="masked-title__word is-active">Design.</span>
+        <span class="masked-title__word">Prototype.</span>
+        <span class="masked-title__word">Animate.</span>
+        <span class="masked-title__word">Ship.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PILLARS ============ -->
+  <section class="home-pillars grid bg-white">
+    <div class="home-pillars__head">
+      <h2 class="h2 h2--scale ttu"><span class="line"><span class="line__inner">How I build</span></span></h2>
+    </div>
+    <ul class="pillars">
+      <li class="pillar" data-reveal>
+        <span class="pillar__num p2">01</span>
+        <h3 class="pillar__title h3">Motion first</h3>
+        <p class="pillar__copy p">Timing, easing and choreography are decided before a single pixel is painted. Motion is structure, not decoration.</p>
+      </li>
+      <li class="pillar" data-reveal>
+        <span class="pillar__num p2">02</span>
+        <h3 class="pillar__title h3">Built to last</h3>
+        <p class="pillar__copy p">Typed, tested and accessible. Reduced-motion paths and keyboard routes are part of the first commit.</p>
+      </li>
+      <li class="pillar" data-reveal>
+        <span class="pillar__num p2">03</span>
+        <h3 class="pillar__title h3">Real performance</h3>
+        <p class="pillar__copy p">Compositor-only transforms, budgeted shaders, and a scroll loop that never drops below the refresh rate.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============ WORK GRID ============ -->
+  <section class="work" id="work">
+    <div class="work__head grid">
+      <h2 class="h2 h2--scale ttu"><span class="line"><span class="line__inner">Selected work</span></span></h2>
+    </div>
+    <div class="work-grid" data-work-grid></div>
+  </section>
+
+  <!-- ============ MASKED QUOTE ============ -->
+  <section class="quote-section">
+    <blockquote class="masked-copy h2" data-mask-copy>
+      When the motion is right, the interface stops feeling like software and starts feeling like a place.
+    </blockquote>
+  </section>
+
+  <!-- ============ DISCIPLINE CAROUSEL ============ -->
+  <section class="home-carousel" data-carousel>
+    <div class="home-carousel-titles">
+      <div class="home-carousel-title h2 h2--scale ttu is-active" data-index="0">Web<span class="dot">.</span></div>
+      <div class="home-carousel-title h2 h2--scale ttu" data-index="1">Motion<span class="dot">.</span></div>
+      <div class="home-carousel-title h2 h2--scale ttu" data-index="2">Shaders<span class="dot">.</span></div>
+      <div class="home-carousel-title h2 h2--scale ttu" data-index="3">Systems<span class="dot">.</span></div>
+    </div>
+    <div class="home-carousel-images" data-carousel-images></div>
+    <div class="home-carousel-descriptions">
+      <div class="home-carousel-copy p is-active">Production front-ends in Vue, React and vanilla — server-rendered, fast, and accessible by default.</div>
+      <div class="home-carousel-copy p">Scroll choreography and page transitions built on GSAP timelines with a smooth-scroll layer underneath.</div>
+      <div class="home-carousel-copy p">GLSL for gradients, distortion and particle fields — budgeted so they never cost the frame.</div>
+      <div class="home-carousel-copy p">Design systems and component libraries that survive contact with a growing team.</div>
+    </div>
+  </section>
+
+  <!-- ============ HIGHLIGHTS SLIDER ============ -->
+  <section class="highlights" id="about">
+    <div class="grid highlights__head">
+      <h2 class="h2 h2--scale ttu"><span class="line"><span class="line__inner">Highlights</span></span></h2>
+    </div>
+    <div class="slider" data-slider>
+      <div class="slider__track" data-slider-track></div>
+    </div>
+  </section>
+
+  <!-- ============ TOOLKIT MARQUEE ============ -->
+  <section class="featured-partners bg-white">
+    <div class="marquee" data-marquee>
+      <div class="marquee__track">
+        <span>TypeScript</span><span>GSAP</span><span>Three.js</span><span>WebGL</span><span>Vue</span>
+        <span>React</span><span>Nuxt</span><span>GLSL</span><span>Lenis</span><span>Vite</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COUNTDOWN CTA ============ -->
+  <section class="footer-countdown grid bg-white" id="contact">
+    <h2 class="h2 h2--scale ttu countdown__lead"><span class="line"><span class="line__inner">Next opening</span></span></h2>
+    <div class="countdown countdown--long-labels h1" data-countdown>
+      <div class="countdown__unit"><span class="countdown__val" data-cd="days">00</span><span class="countdown__label p2 ttu">days</span></div>
+      <div class="countdown__unit"><span class="countdown__val" data-cd="hours">00</span><span class="countdown__label p2 ttu">hrs</span></div>
+      <div class="countdown__unit"><span class="countdown__val" data-cd="minutes">00</span><span class="countdown__label p2 ttu">min</span></div>
+      <div class="countdown__unit"><span class="countdown__val" data-cd="seconds">00</span><span class="countdown__label p2 ttu">sec</span></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer__col footer__col--brand">
+    <p class="footer__title h3">Joshua Park</p>
+    <p class="footer__lead h3">Let's build something<br>worth scrolling.</p>
+    <a class="pill-btn pill-btn--light" href="mailto:hello@example.com">Say hello</a>
+    <div class="footer__logo" aria-hidden="true"><canvas class="footer__logo-canvas"></canvas></div>
+    <p class="footer__copy p2">2026 © Joshua Park — built from scratch</p>
+  </div>
+  <div class="footer__col footer__col--links">
+    <ul class="footer__list">
+      <li><a href="#work" class="p">Selected work</a></li>
+      <li><a href="#craft" class="p">How I build</a></li>
+      <li><a href="#about" class="p">Highlights</a></li>
+      <li><a href="#contact" class="p">Contact</a></li>
+    </ul>
+    <ul class="footer__list">
+      <li><a href="#" class="p">GitHub <span class="ext">↗</span></a></li>
+      <li><a href="#" class="p">LinkedIn <span class="ext">↗</span></a></li>
+      <li><a href="#" class="p">Read.cv <span class="ext">↗</span></a></li>
+      <li><a href="#" class="p">Experiments <span class="ext">↗</span></a></li>
+    </ul>
+    <div class="footer__cta">
+      <p class="h3">Secure a slot<br>for Q3.</p>
+    </div>
+  </div>
+</footer>
+</div>
+
+<!-- ============ CORNER MODAL ============ -->
+<aside class="modal" data-modal>
+  <button class="modal__close" aria-label="Close panel">
+    <svg viewBox="0 0 25 26" fill="none" aria-hidden="true"><path d="M24.293 1.354.716 24.931"/><path d="m.354.646 23.577 23.578"/></svg>
+  </button>
+  <div class="modal__media" aria-hidden="true"><span class="modal__media-inner"></span></div>
+  <div class="modal__body">
+    <p class="modal__title">Currently booking Q3 2026</p>
+    <p class="modal__copy p">Two project slots left this quarter. Drop a line and I'll send a short availability note.</p>
+    <form class="modal__form" data-modal-form>
+      <input type="text" placeholder="Full name" aria-label="Full name" required>
+      <input type="email" placeholder="E-mail address" aria-label="E-mail address" required>
+      <button type="submit" class="modal__submit">Send</button>
+    </form>
+  </div>
+</aside>
+
+<!-- ============ CUSTOM CURSOR ============ -->
+<div class="cursor cursor--next" data-cursor-el aria-hidden="true"><span class="cursor__label">View</span></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
