@@ -1,11 +1,20 @@
 /* =========================================================
    logo-webgl.js
-   A ring-logo built from many overlapping translucent discs.
-   Each disc is shaded by a 6-stop vertical gradient plus a
-   tint / contrast / brightness / saturation grade, so the
-   overlaps build up depth instead of flat colour.
+   A mark built from a small number of LARGE translucent discs
+   threaded along parametric paths. Each disc is a flat screen-
+   print style ellipse with an internal vertical gradient, so
+   overlapping discs read as distinct stacked shapes.
+
+   The canvas composites with mix-blend-mode:difference, so the
+   colours here are the *inverse* of what appears on screen:
+   a violet->pink ramp over a blue backdrop reads as maroon->red.
    ========================================================= */
 import * as THREE from '../../vendor/three.module.js';
+
+// This shader writes gl_FragColor directly, with no linear->sRGB step on output.
+// Leaving colour management on would convert the hex stops sRGB->linear on the way
+// in and never convert back, crushing midtones (green worst). Keep the stops raw.
+THREE.ColorManagement.enabled = false;
 
 const VERT = /* glsl */`
 varying vec2 vUv;
@@ -24,25 +33,21 @@ uniform float uBrightness;
 uniform float uSaturation;
 varying vec2  vUv;
 
-vec3 adjustTint(vec3 c, float t){
-  return mix(c, vec3(c.r*1.06, c.g*0.98, c.b*1.04), t);
-}
-vec3 adjustContrast(vec3 c, float v){
-  return clamp((c - 0.5) * v + 0.5, 0.0, 1.0);
-}
-vec3 adjustBrightness(vec3 c, float v){
-  return clamp(c + v, 0.0, 1.0);
-}
+vec3 adjustTint(vec3 c, float t){ return mix(c, vec3(c.r*1.05, c.g*0.98, c.b*1.05), t); }
+vec3 adjustContrast(vec3 c, float v){ return clamp((c - 0.5) * v + 0.5, 0.0, 1.0); }
+vec3 adjustBrightness(vec3 c, float v){ return clamp(c + v, 0.0, 1.0); }
 vec3 adjustSaturation(vec3 c, float v){
   float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
   return clamp(mix(vec3(l), c, v), 0.0, 1.0);
 }
 
 void main(){
-  // discard outside the unit circle -> disc geometry from a quad
   vec2 p = vUv * 2.0 - 1.0;
-  float d = dot(p, p);
-  if (d > 1.0) discard;
+  float d = length(p);
+  // crisp edge, antialiased only — these are flat printed circles
+  float aa = fwidth(d) * 1.2;
+  float mask = 1.0 - smoothstep(1.0 - aa, 1.0, d);
+  if (mask <= 0.001) discard;
 
   vec3 color = mix(uColors[0], uColors[1], smoothstep(-1.0, 0.05, vUv.y));
   color = mix(color, uColors[3], smoothstep(0.05, 0.48, vUv.y));
@@ -53,40 +58,37 @@ void main(){
   color = adjustBrightness(color, uBrightness);
   color = adjustSaturation(color, uSaturation);
 
-  // soften the rim so discs melt into each other
-  float edge = smoothstep(1.0, 0.90, d);
-  gl_FragColor = vec4(color, uAlpha * edge);
+  gl_FragColor = vec4(color, uAlpha * mask);
 }`;
 
-const hex = (h) => new THREE.Color(h);
-
-/* ---- parametric paths the discs are threaded along ---- */
-function ringPath(count, cx, cy, rx, ry, from = 0, to = Math.PI * 2) {
+/* ---- parametric paths ---- */
+function ringPath(count, cx, cy, r, from = 0, to = Math.PI * 2, closed = true) {
   const pts = [];
+  const n = closed ? count : count - 1;
   for (let i = 0; i < count; i++) {
-    const t = from + (to - from) * (i / count);
-    pts.push([cx + Math.cos(t) * rx, cy + Math.sin(t) * ry]);
+    const t = from + (to - from) * (i / n);
+    pts.push([cx + Math.cos(t) * r, cy + Math.sin(t) * r]);
   }
   return pts;
 }
 
+/** a "2"-like glyph: top arc -> diagonal -> base bar */
 function twoPath(count, cx, cy, s) {
-  // a "2"-like glyph traced as an arc + diagonal + base bar
   const pts = [];
-  const arcN = Math.round(count * 0.5);
+  const arcN = Math.round(count * 0.46);
   for (let i = 0; i < arcN; i++) {
-    const t = Math.PI * 0.95 - (Math.PI * 1.15) * (i / (arcN - 1));
-    pts.push([cx + Math.cos(t) * s * 0.72, cy + s * 0.42 + Math.sin(t) * s * 0.5]);
+    const t = Math.PI * 1.06 - Math.PI * 1.28 * (i / (arcN - 1));
+    pts.push([cx + Math.cos(t) * s * 0.78, cy + s * 0.46 + Math.sin(t) * s * 0.54]);
   }
-  const diagN = Math.round(count * 0.3);
-  for (let i = 0; i < diagN; i++) {
-    const k = i / (diagN - 1);
-    pts.push([cx + s * 0.52 - s * 1.16 * k, cy + s * 0.06 - s * 0.72 * k]);
+  const diagN = Math.round(count * 0.30);
+  for (let i = 1; i <= diagN; i++) {
+    const k = i / diagN;
+    pts.push([cx + s * 0.60 - s * 1.30 * k, cy + s * 0.10 - s * 0.80 * k]);
   }
   const barN = count - pts.length;
   for (let i = 0; i < barN; i++) {
-    const k = i / Math.max(1, barN - 1);
-    pts.push([cx - s * 0.64 + s * 1.34 * k, cy - s * 0.72]);
+    const k = barN === 1 ? 0 : i / (barN - 1);
+    pts.push([cx - s * 0.70 + s * 1.44 * k, cy - s * 0.72]);
   }
   return pts;
 }
@@ -94,92 +96,90 @@ function twoPath(count, cx, cy, s) {
 export default class LogoWebGL {
   constructor(canvas, opts = {}) {
     this.canvas = canvas;
-    this.opts = Object.assign({
-      shape: 'mark',          // 'mark' = ring + 2 ; 'ring' = single ring
-      discs: 44,
-      radius: 0.30,           // disc radius in world units
-      alpha: 0.86,
-      colors: ['#4a0d0d', '#b3231d', '#e8372a', '#ff3d3d', '#ff6a2d', '#ffa24d'],
-      tint: 0.35, contrast: 1.04, brightness: 0.0, saturation: 1.12,
+    this.o = Object.assign({
+      shape: 'mark',
+      ringDiscs: 17,       // large discs -> each circle stays readable
+      glyphDiscs: 16,
+      ringRadius: 1.42,
+      discRadius: 0.53,    // ~50% overlap against the ring spacing
+      ellipse: 1.07,       // slightly taller than wide
+      alpha: 0.85,
+      // inverse palette: reads as maroon -> red-orange through `difference`
+      // solved from out = |backdrop - canvas| against the blue backdrop:
+      // periwinkle -> light pink reads as dark maroon -> bright red-orange
+      // Sampled from the reference: each disc is a near-FLAT bright magenta.
+      // Depth comes from translucent discs ACCUMULATING, not from internal shading:
+      // 1 layer -> dark maroon, 3 layers -> bright red, through the difference blend.
+      colors: ['#ff82fc', '#ff82fc', '#ff78fb', '#ff70fa', '#fa6bf5', '#f567f0'],
+      tint: 0.0, contrast: 1.0, brightness: 0.0, saturation: 1.0,
       spread: 1.0,
-      spin: 0.0
+      zoomFrom: 1.95,      // scroll-driven zoom: hero -> full mark
+      zoomTo: 1.0,
+      panFrom: -1.15,
+      panTo: 0.0,
+      autoFit: true
     }, opts);
 
-    this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.time = 0;
-    this.progress = 0;
-    this._raf = null;
+    this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.t = 0; this.p = 0; this._raf = null;
     this.init();
   }
 
   init() {
     const { canvas } = this;
-    this.renderer = new THREE.WebGLRenderer({
-      canvas, alpha: true, antialias: true, powerPreference: 'high-performance'
-    });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true,
+      powerPreference: 'high-performance' });
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    this.renderer.setClearAlpha(0);
     this.scene = new THREE.Scene();
 
-    const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
     this.frustum = 2.4;
-    this.camera = new THREE.OrthographicCamera(
-      -this.frustum * aspect, this.frustum * aspect,
-      this.frustum, -this.frustum, 0.1, 100
-    );
+    this.camera = new THREE.OrthographicCamera(-4, 4, this.frustum, -this.frustum, 0.1, 100);
     this.camera.position.z = 10;
 
     this.group = new THREE.Group();
     this.scene.add(this.group);
 
     const geo = new THREE.PlaneGeometry(1, 1);
-    const c = this.opts.colors.map(hex);
-
     this.material = new THREE.ShaderMaterial({
-      vertexShader: VERT,
-      fragmentShader: FRAG,
-      transparent: true,
-      depthWrite: false,
-      depthTest: false,
+      vertexShader: VERT, fragmentShader: FRAG,
+      transparent: true, depthWrite: false, depthTest: false,
       uniforms: {
-        uColors: { value: c },
-        uAlpha: { value: this.opts.alpha },
-        uTint: { value: this.opts.tint },
-        uContrast: { value: this.opts.contrast },
-        uBrightness: { value: this.opts.brightness },
-        uSaturation: { value: this.opts.saturation }
+        uColors: { value: this.o.colors.map((h) => new THREE.Color(h)) },
+        uAlpha: { value: this.o.alpha },
+        uTint: { value: this.o.tint },
+        uContrast: { value: this.o.contrast },
+        uBrightness: { value: this.o.brightness },
+        uSaturation: { value: this.o.saturation }
       }
     });
 
     this.discs = [];
-    const pts = this.buildPoints();
-    const r = this.opts.radius;
-    pts.forEach((p, i) => {
+    this.buildPoints().forEach((pt, i) => {
       const m = new THREE.Mesh(geo, this.material);
-      m.scale.setScalar(r * 2);
-      m.position.set(p[0], p[1], i * 0.0001);
-      m.userData.base = { x: p[0], y: p[1], i };
+      m.position.set(pt[0], pt[1], i * 0.0001);
+      m.userData.base = { x: pt[0], y: pt[1], i };
       this.group.add(m);
       this.discs.push(m);
     });
 
     this.resize();
-    window.addEventListener('resize', this.resize.bind(this), { passive: true });
+    addEventListener('resize', this.resize.bind(this), { passive: true });
     this.start();
   }
 
   buildPoints() {
-    const n = this.opts.discs;
-    if (this.opts.shape === 'ring') return ringPath(n, 0, 0, 1.15, 1.15);
-    // 'mark': a ring on the left, a 2-glyph on the right
-    const a = ringPath(Math.round(n * 0.52), -1.15, 0, 1.02, 1.02);
-    const b = twoPath(n - Math.round(n * 0.52), 1.22, 0, 1.15);
-    return a.concat(b);
+    const o = this.o;
+    if (o.shape === 'ring') return ringPath(o.ringDiscs, 0, 0, o.ringRadius);
+    // mark: ring on the left, glyph on the right
+    return ringPath(o.ringDiscs, -1.6, 0, o.ringRadius)
+      .concat(twoPath(o.glyphDiscs, 1.68, 0, 1.36));
   }
 
   resize() {
     const { canvas } = this;
-    const w = canvas.clientWidth || canvas.parentElement.clientWidth;
-    const h = canvas.clientHeight || canvas.parentElement.clientHeight;
+    const w = canvas.clientWidth || canvas.parentElement?.clientWidth;
+    const h = canvas.clientHeight || canvas.parentElement?.clientHeight;
     if (!w || !h) return;
     this.renderer.setSize(w, h, false);
     const aspect = w / h;
@@ -188,18 +188,16 @@ export default class LogoWebGL {
     this.camera.top = this.frustum;
     this.camera.bottom = -this.frustum;
     this.camera.updateProjectionMatrix();
-    // keep the mark comfortably inside narrow viewports
-    const fit = Math.min(1, aspect / 1.35);
-    this.group.scale.setScalar(fit * this.opts.spread);
+    this._fit = this.o.autoFit ? Math.min(1, aspect / 1.55) : 1;
   }
 
-  /** progress 0..1 — driven by scroll */
-  setProgress(p) { this.progress = p; }
+  /** 0..1 — page scroll progress across the mark's chapter */
+  setProgress(p) { this.p = Math.max(0, Math.min(1, p)); }
 
   start() {
     const loop = () => {
       this._raf = requestAnimationFrame(loop);
-      this.time += this.reduced ? 0 : 0.016;
+      if (!this.reduced) this.t += 0.016;
       this.update();
       this.renderer.render(this.scene, this.camera);
     };
@@ -207,23 +205,26 @@ export default class LogoWebGL {
   }
 
   update() {
-    const t = this.time;
-    const p = this.progress;
-    this.group.rotation.z = (this.opts.spin * p) + (this.reduced ? 0 : Math.sin(t * 0.12) * 0.03);
+    const o = this.o, t = this.t, p = this.p;
+    const ease = 1 - Math.pow(1 - p, 2);
+    const zoom = o.zoomFrom + (o.zoomTo - o.zoomFrom) * ease;
+    const pan  = o.panFrom  + (o.panTo  - o.panFrom)  * ease;
+
+    this.group.scale.setScalar(zoom * (this._fit || 1) * o.spread);
+    this.group.position.y = pan;
+    this.group.rotation.z = this.reduced ? 0 : Math.sin(t * 0.1) * 0.02;
+
+    const r = o.discRadius * 2;
     this.discs.forEach((m, i) => {
       const b = m.userData.base;
-      // gentle organic drift so the overlaps keep breathing
-      const wob = this.reduced ? 0 : Math.sin(t * 0.6 + i * 0.55) * 0.045;
-      const wob2 = this.reduced ? 0 : Math.cos(t * 0.45 + i * 0.31) * 0.045;
+      const wob = this.reduced ? 0 : Math.sin(t * 0.5 + i * 0.6) * 0.03;
+      const wob2 = this.reduced ? 0 : Math.cos(t * 0.4 + i * 0.35) * 0.03;
       m.position.x = b.x + wob;
       m.position.y = b.y + wob2;
-      const s = this.opts.radius * 2 * (1 + (this.reduced ? 0 : Math.sin(t * 0.5 + i) * 0.05));
-      m.scale.setScalar(s);
+      const s = this.reduced ? 1 : 1 + Math.sin(t * 0.45 + i * 0.8) * 0.03;
+      m.scale.set(r * s, r * s * o.ellipse, 1);
     });
   }
 
-  destroy() {
-    cancelAnimationFrame(this._raf);
-    this.renderer.dispose();
-  }
+  destroy() { cancelAnimationFrame(this._raf); this.renderer.dispose(); }
 }

@@ -5,7 +5,11 @@
    ========================================================= */
 
 *,*::before,*::after{box-sizing:border-box}
-html{box-sizing:border-box;font-size:62.5%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+/* overflow-x:clip — NOT hidden. `hidden` makes overflow-y compute to `auto`,
+   which creates a scroll container and silently breaks every position:sticky
+   stage on the page (the word drum, the carousel nav). `clip` clips without
+   establishing one. */
+html{box-sizing:border-box;font-size:62.5%;overflow-x:clip;-webkit-text-size-adjust:100%}
 body,h1,h2,h3,h4,p,ul,ol,li,figure,blockquote{margin:0;padding:0}
 ul,ol{list-style:none}
 img,canvas,svg{display:block;max-width:100%}
@@ -30,7 +34,7 @@ body{
   background-color:var(--off-white);color:var(--black);
   font-family:"Schibsted Grotesk","Neue Montreal","Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size:1.6rem;font-style:normal;font-weight:500;line-height:1;
-  overflow-x:hidden;
+  overflow-x:clip;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 body.is-locked{overflow:hidden}
@@ -270,7 +274,8 @@ body.contact-open .tickets-toggle__svg--close{display:block}
    ========================================================= */
 .words-carousel{height:400vh;height:calc(var(--vh)*400);position:relative}
 .words-carousel__inner{position:sticky;top:0;height:100vh;height:calc(var(--vh)*100);
-  display:flex;align-items:center;justify-content:center;overflow:hidden}
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  perspective:120rem;perspective-origin:50% 50%}
 .words-carousel__list{
   height:50vw;width:50vw;position:relative;transform-origin:50% 50%;transform-style:preserve-3d;
 }

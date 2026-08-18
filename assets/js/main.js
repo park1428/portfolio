@@ -103,16 +103,17 @@ function initIntro() {
       qs('.logo-webgl')?.classList.add('is-in');
       qs('.home-hero__title')?.classList.add('is-visible');
     }, 120);
-    setTimeout(() => qs('[data-modal-countdown]')?.classList.add('modal-countdown--visible'), 2200);
   });
 }
 
 /* ---------------------------------------------------------
    background palettes
    --------------------------------------------------------- */
+// stage 0 hero: warm left / blue right.  stage 1 carousel: cool on BOTH halves,
+// so the difference-blended mark reads uniformly red.  stage 2: warm again.
 const PALETTES = [
-  ['linear-gradient(135deg,#eb7d2e,#fa5ca6 45%,#ed6339)', 'linear-gradient(135deg,#3788ff,#4a19d2 60%,#982ced)'],
-  ['linear-gradient(135deg,#ff2d52,#ff47cc 50%,#982ced)', 'linear-gradient(135deg,#4a19d2,#3788ff 55%,#0f0 130%)'],
+  ['linear-gradient(135deg,#ed6339,#fa5ca6 45%,#eb7d2e)', 'linear-gradient(135deg,#3788ff,#2f6fe8 60%,#1a4fd0)'],
+  ['linear-gradient(135deg,#4a19d2,#295ae3 55%,#1871e6)', 'linear-gradient(135deg,#1871e6,#2168e0 60%,#1a58d8)'],
   ['linear-gradient(135deg,#ffa24d,#ff3d3d 55%,#fa5ca6)', 'linear-gradient(135deg,#982ced,#3788ff 60%,#4a19d2)']
 ];
 function initBackground() {
@@ -126,9 +127,9 @@ function initBackground() {
     gsap.to(peach, { background: p[0], duration: 1.1, ease: 'power2.out' });
     gsap.to(blue,  { background: p[1], duration: 1.1, ease: 'power2.out' });
   };
-  [['.words-carousel', 1], ['.home-stats', 2]].forEach(([sel, i]) => {
+  [['.words-carousel', 1, 'top 92%'], ['.home-stats', 2, 'top 60%']].forEach(([sel, i, start]) => {
     const el = qs(sel); if (!el) return;
-    ST.create({ trigger: el, start: 'top 60%', end: 'bottom 40%',
+    ST.create({ trigger: el, start, end: 'bottom 40%',
       onEnter: () => apply(i), onEnterBack: () => apply(i), onLeaveBack: () => apply(i - 1) });
   });
 }
@@ -140,17 +141,24 @@ function initWebGL() {
   const canvas = qs('.logo-webgl__canvas');
   if (canvas) {
     try {
-      const mark = new LogoWebGL(canvas, { shape: 'mark', discs: 46, radius: 0.34, alpha: 1 });
-      const stage = qs('.words-carousel');
-      if (stage) ST.create({ trigger: stage, start: 'top bottom', end: 'bottom top',
-        onUpdate: (s) => mark.setProgress(s.progress) });
+      const mark = new LogoWebGL(canvas, { shape: 'mark' });
+      // zoom out from the hero crop to the full mark by the carousel
+      const hero = qs('.home-hero'), words = qs('.words-carousel');
+      if (hero && words) {
+        ST.create({
+          trigger: hero, start: 'top top',
+          endTrigger: words, end: 'top top', scrub: true,
+          onUpdate: (s) => mark.setProgress(s.progress)
+        });
+      }
     } catch (e) { console.warn('webgl mark unavailable', e); }
   }
   const fc = qs('.footer__logo-canvas');
-  if (fc) { try { new LogoWebGL(fc, { shape:'mark', discs:40, radius:0.36, alpha:0.98, spread:1.15,
-      colors:['#7a1b5e','#c22a8f','#fa5ca6','#ff47cc','#ff6a9d','#ffa24d'], saturation:1.25 }); } catch(e){} }
+  if (fc) { try { new LogoWebGL(fc, { shape:'mark', alpha:0.95, zoomFrom:1, zoomTo:1, panFrom:0, panTo:0,
+      colors:['#7a1b5e','#a8228a','#c22a8f','#e63b9e','#fa5ca6','#ff8ac4'], saturation:1.2 }); } catch(e){} }
   const cc = qs('.footer__webgl-canvas');
-  if (cc) { try { new LogoWebGL(cc, { shape:'ring', discs:34, radius:0.30, alpha:0.95, spread:1.5,
+  if (cc) { try { new LogoWebGL(cc, { shape:'ring', ringDiscs:20, ringRadius:1.5, discRadius:0.55,
+      alpha:0.95, zoomFrom:1, zoomTo:1, panFrom:0, panTo:0, autoFit:false, spread:1.2,
       colors:['#3a0f5e','#7a1b8e','#c22a5f','#ff3d3d','#ff8a2d','#ffd24d'], saturation:1.2 }); } catch(e){} }
 }
 
@@ -174,11 +182,18 @@ function initWords() {
   addEventListener('resize', layout, { passive: true });
   list.style.transformStyle = 'preserve-3d';
 
-  if (REDUCED) { list.style.transform = 'perspective(100rem)'; return; }
+  if (REDUCED) { list.style.transform = 'none'; return; }
   ST.create({
     trigger: '.words-carousel', start: 'top top', end: 'bottom bottom', scrub: 1,
     onUpdate: (s) => {
-      list.style.transform = `perspective(120rem) rotateX(${(-s.progress * 360).toFixed(2)}deg)`;
+      const rot = -s.progress * 360;
+      list.style.transform = `rotateX(${rot.toFixed(2)}deg)`;
+      // fade off-axis words so one reads as dominant, the neighbours as ghosts
+      items.forEach((el, i) => {
+        const a = ((i * step + rot) % 360 + 540) % 360 - 180;   // -180..180
+        const f = Math.cos(a * Math.PI / 180);
+        el.style.opacity = f <= 0 ? 0 : Math.pow(f, 3).toFixed(3);
+      });
     }
   });
 }
